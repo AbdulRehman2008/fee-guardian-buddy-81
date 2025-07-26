@@ -129,9 +129,17 @@ const PaymentManagement: React.FC = () => {
 
   const generateStudentInvoice = (studentId: string) => {
     const student = students.find(s => s.id === studentId);
-    if (!student) return;
+    if (!student) {
+      toast({
+        title: "Error",
+        description: "Student not found.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const studentPayments = payments.filter(p => p.studentId === studentId && p.status === 'completed');
+    const structure = feeStructures.find(fs => fs.class === student.class);
     
     // Group payments by month and year
     const paymentsByMonth = studentPayments.reduce((acc, payment) => {
@@ -158,41 +166,64 @@ const PaymentManagement: React.FC = () => {
       Parent: ${student.parentName}
       Contact: ${student.parentContact}
       Email: ${student.email}
+      Admission Date: ${new Date(student.admissionDate).toLocaleDateString()}
       
-      MONTHLY PAYMENT HISTORY
-      ========================
-    `;
+      Fee Structure (Class ${student.class}):`;
+      
+    if (structure) {
+      invoiceContent += `\n      Structure: ${structure.name}`;
+      structure.feeTypes.forEach(feeType => {
+        invoiceContent += `\n      ${feeType.name}: ₹${feeType.amount.toLocaleString()} (${feeType.frequency})`;
+      });
+      invoiceContent += `\n      Total Monthly Fee: ₹${structure.totalAmount.toLocaleString()}`;
+    }
+    
+    invoiceContent += `\n      
+      PAYMENT HISTORY
+      ===============`;
 
     let totalPaid = 0;
     
-    sortedMonths.forEach(monthYear => {
-      const [year, month] = monthYear.split('-');
-      const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { 
-        month: 'long', 
-        year: 'numeric' 
+    if (sortedMonths.length === 0) {
+      invoiceContent += `\n      
+      No payments recorded yet.
+      
+      Outstanding Amount: ₹${structure ? structure.totalAmount.toLocaleString() : '0'}`;
+    } else {
+      sortedMonths.forEach(monthYear => {
+        const [year, month] = monthYear.split('-');
+        const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { 
+          month: 'long', 
+          year: 'numeric' 
+        });
+        
+        invoiceContent += `\n\n      ${monthName.toUpperCase()}\n      ${'-'.repeat(monthName.length + 10)}\n`;
+        
+        let monthTotal = 0;
+        paymentsByMonth[monthYear].forEach(payment => {
+          const feeTypeName = getFeeTypeName(payment.feeTypeId);
+          invoiceContent += `      ${new Date(payment.date).toLocaleDateString().padEnd(12)} ${feeTypeName.padEnd(20)} ₹${payment.amount.toLocaleString().padStart(10)} ${payment.method.toUpperCase().padEnd(10)} ${payment.receiptNumber}\n`;
+          monthTotal += payment.amount;
+          totalPaid += payment.amount;
+        });
+        
+        invoiceContent += `      ${' '.repeat(32)} Month Total: ₹${monthTotal.toLocaleString()}\n`;
       });
-      
-      invoiceContent += `\n\n      ${monthName.toUpperCase()}\n      ${'-'.repeat(monthName.length + 10)}\n`;
-      
-      let monthTotal = 0;
-      paymentsByMonth[monthYear].forEach(payment => {
-        const feeTypeName = getFeeTypeName(payment.feeTypeId);
-        invoiceContent += `      ${new Date(payment.date).toLocaleDateString().padEnd(12)} ${feeTypeName.padEnd(20)} ₹${payment.amount.toLocaleString().padStart(10)} ${payment.method.toUpperCase().padEnd(10)} ${payment.receiptNumber}\n`;
-        monthTotal += payment.amount;
-        totalPaid += payment.amount;
-      });
-      
-      invoiceContent += `      ${' '.repeat(32)} Month Total: ₹${monthTotal.toLocaleString()}\n`;
-    });
+    }
+
+    const outstandingAmount = structure ? (structure.totalAmount * sortedMonths.length) - totalPaid : 0;
 
     invoiceContent += `
       
       SUMMARY
       =======
-      Total Months Paid: ${sortedMonths.length}
+      Total Months with Payments: ${sortedMonths.length}
       Total Amount Paid: ₹${totalPaid.toLocaleString()}
+      ${structure ? `Outstanding Amount: ₹${Math.max(0, outstandingAmount).toLocaleString()}` : ''}
+      Current Dues: ₹${structure ? Math.max(0, structure.totalAmount - (totalPaid % (structure.totalAmount || 1))).toLocaleString() : '0'}
       
-      Note: This invoice shows all completed payments made by the student.
+      Note: This invoice shows all payment records for this student.
+      ${studentPayments.length === 0 ? 'No payments have been recorded yet.' : ''}
     `;
 
     const element = document.createElement('a');
@@ -205,7 +236,7 @@ const PaymentManagement: React.FC = () => {
 
     toast({
       title: "Invoice Generated",
-      description: `Monthly payment invoice for ${student.name} has been downloaded.`,
+      description: `Payment invoice for ${student.name} has been downloaded.`,
     });
   };
 
@@ -358,7 +389,6 @@ const PaymentManagement: React.FC = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => generateStudentInvoice(student.id)}
-                      disabled={studentPayments.length === 0}
                       className="w-full"
                     >
                       <FileText className="h-4 w-4 mr-2" />
