@@ -14,7 +14,8 @@ import {
   CreditCard,
   Calendar,
   User,
-  Receipt
+  Receipt,
+  FileText
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -124,6 +125,88 @@ const PaymentManagement: React.FC = () => {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+  };
+
+  const generateStudentInvoice = (studentId: string) => {
+    const student = students.find(s => s.id === studentId);
+    if (!student) return;
+
+    const studentPayments = payments.filter(p => p.studentId === studentId && p.status === 'completed');
+    
+    // Group payments by month and year
+    const paymentsByMonth = studentPayments.reduce((acc, payment) => {
+      const date = new Date(payment.date);
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      
+      if (!acc[monthYear]) {
+        acc[monthYear] = [];
+      }
+      acc[monthYear].push(payment);
+      return acc;
+    }, {} as Record<string, Payment[]>);
+
+    const sortedMonths = Object.keys(paymentsByMonth).sort();
+    
+    let invoiceContent = `
+      STUDENT PAYMENT INVOICE
+      Generated on: ${new Date().toLocaleDateString()}
+      
+      Student Details:
+      Name: ${student.name}
+      Roll Number: ${student.rollNumber}
+      Class: ${student.class}-${student.section}
+      Parent: ${student.parentName}
+      Contact: ${student.parentContact}
+      Email: ${student.email}
+      
+      MONTHLY PAYMENT HISTORY
+      ========================
+    `;
+
+    let totalPaid = 0;
+    
+    sortedMonths.forEach(monthYear => {
+      const [year, month] = monthYear.split('-');
+      const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+      });
+      
+      invoiceContent += `\n\n      ${monthName.toUpperCase()}\n      ${'-'.repeat(monthName.length + 10)}\n`;
+      
+      let monthTotal = 0;
+      paymentsByMonth[monthYear].forEach(payment => {
+        const feeTypeName = getFeeTypeName(payment.feeTypeId);
+        invoiceContent += `      ${new Date(payment.date).toLocaleDateString().padEnd(12)} ${feeTypeName.padEnd(20)} ₹${payment.amount.toLocaleString().padStart(10)} ${payment.method.toUpperCase().padEnd(10)} ${payment.receiptNumber}\n`;
+        monthTotal += payment.amount;
+        totalPaid += payment.amount;
+      });
+      
+      invoiceContent += `      ${' '.repeat(32)} Month Total: ₹${monthTotal.toLocaleString()}\n`;
+    });
+
+    invoiceContent += `
+      
+      SUMMARY
+      =======
+      Total Months Paid: ${sortedMonths.length}
+      Total Amount Paid: ₹${totalPaid.toLocaleString()}
+      
+      Note: This invoice shows all completed payments made by the student.
+    `;
+
+    const element = document.createElement('a');
+    const file = new Blob([invoiceContent], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `invoice-${student.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+
+    toast({
+      title: "Invoice Generated",
+      description: `Monthly payment invoice for ${student.name} has been downloaded.`,
+    });
   };
 
   return (
@@ -241,6 +324,53 @@ const PaymentManagement: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Student Invoices Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <FileText className="h-5 w-5 mr-2" />
+            Student Monthly Invoices
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {students.map((student) => {
+              const studentPayments = payments.filter(p => p.studentId === student.id && p.status === 'completed');
+              const monthsPaid = [...new Set(studentPayments.map(p => {
+                const date = new Date(p.date);
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+              }))].length;
+              const totalPaid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
+
+              return (
+                <Card key={student.id} className="p-4">
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-medium text-foreground">{student.name}</h4>
+                      <p className="text-sm text-muted-foreground">Class {student.class}-{student.section}</p>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      <p>Months Paid: {monthsPaid}</p>
+                      <p>Total Paid: ₹{totalPaid.toLocaleString()}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => generateStudentInvoice(student.id)}
+                      disabled={studentPayments.length === 0}
+                      className="w-full"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Generate Invoice
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Search */}
       <div className="relative">
