@@ -47,6 +47,8 @@ interface FeeContextType {
   updateStudent: (id: string, student: Partial<Student>) => void;
   deleteStudent: (id: string) => void;
   addFeeStructure: (structure: Omit<FeeStructure, 'id'>) => void;
+  updateFeeStructure: (id: string, structure: Partial<FeeStructure>) => void;
+  deleteFeeStructure: (id: string) => void;
   addPayment: (payment: Omit<Payment, 'id' | 'receiptNumber'>) => void;
   getStudentDues: (studentId: string) => number;
 }
@@ -144,6 +146,16 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
     setFeeStructures(prev => [...prev, newStructure]);
   };
 
+  const updateFeeStructure = (id: string, structureData: Partial<FeeStructure>) => {
+    setFeeStructures(prev => prev.map(structure => 
+      structure.id === id ? { ...structure, ...structureData } : structure
+    ));
+  };
+
+  const deleteFeeStructure = (id: string) => {
+    setFeeStructures(prev => prev.filter(structure => structure.id !== id));
+  };
+
   const addPayment = (paymentData: Omit<Payment, 'id' | 'receiptNumber'>) => {
     const newPayment: Payment = {
       ...paymentData,
@@ -175,6 +187,8 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
       updateStudent,
       deleteStudent,
       addFeeStructure,
+      updateFeeStructure,
+      deleteFeeStructure,
       addPayment,
       getStudentDues
     }}>

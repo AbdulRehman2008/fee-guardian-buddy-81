@@ -20,9 +20,10 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 const FeeStructureManagement: React.FC = () => {
-  const { feeStructures, addFeeStructure } = useFee();
+  const { feeStructures, addFeeStructure, updateFeeStructure, deleteFeeStructure } = useFee();
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingStructure, setEditingStructure] = useState<FeeStructure | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     class: '',
@@ -47,6 +48,27 @@ const FeeStructureManagement: React.FC = () => {
       frequency: '',
       category: ''
     });
+    setEditingStructure(null);
+  };
+
+  const handleEdit = (structure: FeeStructure) => {
+    setFormData({
+      name: structure.name,
+      class: structure.class,
+      feeTypes: structure.feeTypes
+    });
+    setEditingStructure(structure);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = (structure: FeeStructure) => {
+    if (window.confirm(`Are you sure you want to delete "${structure.name}"?`)) {
+      deleteFeeStructure(structure.id);
+      toast({
+        title: "Fee Structure Deleted",
+        description: `${structure.name} has been deleted successfully.`,
+      });
+    }
   };
 
   const addFeeType = () => {
@@ -101,17 +123,33 @@ const FeeStructureManagement: React.FC = () => {
 
     const totalAmount = formData.feeTypes.reduce((sum, feeType) => sum + feeType.amount, 0);
 
-    addFeeStructure({
-      name: formData.name,
-      class: formData.class,
-      feeTypes: formData.feeTypes,
-      totalAmount
-    });
+    if (editingStructure) {
+      // Update existing structure
+      updateFeeStructure(editingStructure.id, {
+        name: formData.name,
+        class: formData.class,
+        feeTypes: formData.feeTypes,
+        totalAmount
+      });
 
-    toast({
-      title: "Fee Structure Added",
-      description: "New fee structure has been created successfully.",
-    });
+      toast({
+        title: "Fee Structure Updated",
+        description: `${formData.name} has been updated successfully.`,
+      });
+    } else {
+      // Create new structure
+      addFeeStructure({
+        name: formData.name,
+        class: formData.class,
+        feeTypes: formData.feeTypes,
+        totalAmount
+      });
+
+      toast({
+        title: "Fee Structure Added",
+        description: "New fee structure has been created successfully.",
+      });
+    }
     
     resetForm();
     setIsDialogOpen(false);
@@ -162,7 +200,9 @@ const FeeStructureManagement: React.FC = () => {
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New Fee Structure</DialogTitle>
+              <DialogTitle>
+                {editingStructure ? 'Edit Fee Structure' : 'Create New Fee Structure'}
+              </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
@@ -292,7 +332,7 @@ const FeeStructureManagement: React.FC = () => {
 
               <div className="flex space-x-2 pt-4">
                 <Button type="submit" className="flex-1">
-                  Create Fee Structure
+                  {editingStructure ? 'Update Fee Structure' : 'Create Fee Structure'}
                 </Button>
                 <Button 
                   type="button" 
@@ -350,11 +390,21 @@ const FeeStructureManagement: React.FC = () => {
               </div>
               
               <div className="flex space-x-2 pt-2">
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => handleEdit(structure)}
+                >
                   <Edit className="h-3 w-3 mr-1" />
                   Edit
                 </Button>
-                <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => handleDelete(structure)}
+                >
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
