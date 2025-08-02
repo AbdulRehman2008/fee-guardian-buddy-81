@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { useFee } from '@/contexts/FeeContext';
+import { useFee, PassoutStudent } from '@/contexts/FeeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { 
   Search, 
@@ -11,23 +14,35 @@ import {
   Mail,
   Calendar,
   GraduationCap,
-  ArrowLeft
+  ArrowLeft,
+  Plus,
+  Edit,
+  Trash2
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface PassoutStudentsProps {
   onBack: () => void;
 }
 
 const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
-  const { students } = useFee();
+  const { passoutStudents, addPassoutStudent, updatePassoutStudent, deletePassoutStudent } = useFee();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-
-  // For now, we'll simulate passout students by filtering students from previous years
-  // In a real app, you'd have a separate passout students collection
-  const currentYear = new Date().getFullYear();
-  const passoutStudents = students.filter(student => {
-    const admissionYear = new Date(student.admissionDate).getFullYear();
-    return currentYear - admissionYear >= 4; // Assuming 4-year graduation
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<PassoutStudent | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    rollNumber: '',
+    class: '',
+    section: '',
+    parentName: '',
+    parentContact: '',
+    email: '',
+    admissionDate: '',
+    graduationDate: '',
+    finalGrade: '',
+    achievements: ''
   });
 
   const filteredPassoutStudents = passoutStudents.filter(student =>
@@ -35,6 +50,70 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
     student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
     student.class.includes(searchTerm)
   );
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      rollNumber: '',
+      class: '',
+      section: '',
+      parentName: '',
+      parentContact: '',
+      email: '',
+      admissionDate: '',
+      graduationDate: '',
+      finalGrade: '',
+      achievements: ''
+    });
+    setEditingStudent(null);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingStudent) {
+      updatePassoutStudent(editingStudent.id, formData);
+      toast({
+        title: "Student Updated",
+        description: "Passout student information has been updated successfully.",
+      });
+    } else {
+      addPassoutStudent(formData);
+      toast({
+        title: "Student Added",
+        description: "New passout student has been added successfully.",
+      });
+    }
+    
+    resetForm();
+    setIsDialogOpen(false);
+  };
+
+  const handleEdit = (student: PassoutStudent) => {
+    setEditingStudent(student);
+    setFormData({
+      name: student.name,
+      rollNumber: student.rollNumber,
+      class: student.class,
+      section: student.section,
+      parentName: student.parentName,
+      parentContact: student.parentContact,
+      email: student.email,
+      admissionDate: student.admissionDate,
+      graduationDate: student.graduationDate,
+      finalGrade: student.finalGrade || '',
+      achievements: student.achievements || ''
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = (studentId: string) => {
+    deletePassoutStudent(studentId);
+    toast({
+      title: "Student Deleted",
+      description: "Passout student has been removed from the system.",
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -49,10 +128,158 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
             <p className="text-muted-foreground">View details of graduated students</p>
           </div>
         </div>
-        <Badge variant="secondary" className="text-lg px-4 py-2">
-          <GraduationCap className="h-4 w-4 mr-2" />
-          {passoutStudents.length} Graduates
-        </Badge>
+        <div className="flex items-center space-x-3">
+          <Badge variant="secondary" className="text-lg px-4 py-2">
+            <GraduationCap className="h-4 w-4 mr-2" />
+            {passoutStudents.length} Graduates
+          </Badge>
+          
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Passout Student
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingStudent ? 'Edit Passout Student' : 'Add New Passout Student'}
+                </DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rollNumber">Roll Number</Label>
+                    <Input
+                      id="rollNumber"
+                      value={formData.rollNumber}
+                      onChange={(e) => setFormData({ ...formData, rollNumber: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="class">Class</Label>
+                    <Input
+                      id="class"
+                      value={formData.class}
+                      onChange={(e) => setFormData({ ...formData, class: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="section">Section</Label>
+                    <Input
+                      id="section"
+                      value={formData.section}
+                      onChange={(e) => setFormData({ ...formData, section: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="parentName">Parent/Guardian Name</Label>
+                  <Input
+                    id="parentName"
+                    value={formData.parentName}
+                    onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="parentContact">Parent Contact</Label>
+                  <Input
+                    id="parentContact"
+                    value={formData.parentContact}
+                    onChange={(e) => setFormData({ ...formData, parentContact: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="admissionDate">Admission Date</Label>
+                    <Input
+                      id="admissionDate"
+                      type="date"
+                      value={formData.admissionDate}
+                      onChange={(e) => setFormData({ ...formData, admissionDate: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="graduationDate">Graduation Date</Label>
+                    <Input
+                      id="graduationDate"
+                      type="date"
+                      value={formData.graduationDate}
+                      onChange={(e) => setFormData({ ...formData, graduationDate: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="finalGrade">Final Grade</Label>
+                  <Input
+                    id="finalGrade"
+                    value={formData.finalGrade}
+                    onChange={(e) => setFormData({ ...formData, finalGrade: e.target.value })}
+                    placeholder="e.g., A+, First Class, etc."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="achievements">Achievements</Label>
+                  <Textarea
+                    id="achievements"
+                    value={formData.achievements}
+                    onChange={(e) => setFormData({ ...formData, achievements: e.target.value })}
+                    placeholder="Academic achievements, awards, etc."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex space-x-2 pt-4">
+                  <Button type="submit" className="flex-1">
+                    {editingStudent ? 'Update' : 'Add'} Student
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Search */}
@@ -69,9 +296,6 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
       {/* Passout Students Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPassoutStudents.map((student) => {
-          const admissionYear = new Date(student.admissionDate).getFullYear();
-          const graduationYear = admissionYear + 4; // Assuming 4-year course
-          
           return (
             <Card key={student.id} className="border-l-4 border-l-primary">
               <CardHeader className="pb-3">
@@ -108,6 +332,10 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span>Admitted: {new Date(student.admissionDate).toLocaleDateString()}</span>
                   </div>
+                  <div className="flex items-center text-sm">
+                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <span>Graduated: {new Date(student.graduationDate).toLocaleDateString()}</span>
+                  </div>
                 </div>
 
                 <div className="p-3 bg-primary/5 rounded border border-primary/20">
@@ -115,10 +343,39 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
                     <p className="text-sm font-medium text-primary">
                       Class: {student.class}-{student.section}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      Graduation Year: {graduationYear}
-                    </p>
+                    {student.finalGrade && (
+                      <p className="text-xs text-muted-foreground">
+                        Final Grade: {student.finalGrade}
+                      </p>
+                    )}
                   </div>
+                </div>
+
+                {student.achievements && (
+                  <div className="p-2 bg-secondary/50 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">Achievements:</p>
+                    <p className="text-sm">{student.achievements}</p>
+                  </div>
+                )}
+
+                <div className="flex space-x-2 pt-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => handleEdit(student)}
+                    className="flex-1"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => handleDelete(student.id)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>

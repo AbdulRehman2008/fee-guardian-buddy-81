@@ -12,6 +12,12 @@ export interface Student {
   admissionDate: string;
 }
 
+export interface PassoutStudent extends Student {
+  graduationDate: string;
+  finalGrade?: string;
+  achievements?: string;
+}
+
 export interface FeeType {
   id: string;
   name: string;
@@ -41,11 +47,15 @@ export interface Payment {
 
 interface FeeContextType {
   students: Student[];
+  passoutStudents: PassoutStudent[];
   feeStructures: FeeStructure[];
   payments: Payment[];
   addStudent: (student: Omit<Student, 'id'>) => void;
   updateStudent: (id: string, student: Partial<Student>) => void;
   deleteStudent: (id: string) => void;
+  addPassoutStudent: (student: Omit<PassoutStudent, 'id'>) => void;
+  updatePassoutStudent: (id: string, student: Partial<PassoutStudent>) => void;
+  deletePassoutStudent: (id: string) => void;
   addFeeStructure: (structure: Omit<FeeStructure, 'id'>) => void;
   updateFeeStructure: (id: string, structure: Partial<FeeStructure>) => void;
   deleteFeeStructure: (id: string) => void;
@@ -93,6 +103,8 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
     }
   ]);
 
+  const [passoutStudents, setPassoutStudents] = useState<PassoutStudent[]>([]);
+
   const [feeStructures, setFeeStructures] = useState<FeeStructure[]>([
     {
       id: '1',
@@ -138,6 +150,24 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
     setStudents(prev => prev.filter(student => student.id !== id));
   };
 
+  const addPassoutStudent = (studentData: Omit<PassoutStudent, 'id'>) => {
+    const newStudent: PassoutStudent = {
+      ...studentData,
+      id: Date.now().toString()
+    };
+    setPassoutStudents(prev => [...prev, newStudent]);
+  };
+
+  const updatePassoutStudent = (id: string, studentData: Partial<PassoutStudent>) => {
+    setPassoutStudents(prev => prev.map(student => 
+      student.id === id ? { ...student, ...studentData } : student
+    ));
+  };
+
+  const deletePassoutStudent = (id: string) => {
+    setPassoutStudents(prev => prev.filter(student => student.id !== id));
+  };
+
   const addFeeStructure = (structureData: Omit<FeeStructure, 'id'>) => {
     const newStructure: FeeStructure = {
       ...structureData,
@@ -181,11 +211,15 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
   return (
     <FeeContext.Provider value={{
       students,
+      passoutStudents,
       feeStructures,
       payments,
       addStudent,
       updateStudent,
       deleteStudent,
+      addPassoutStudent,
+      updatePassoutStudent,
+      deletePassoutStudent,
       addFeeStructure,
       updateFeeStructure,
       deleteFeeStructure,
