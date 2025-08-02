@@ -18,7 +18,11 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const StudentManagement: React.FC = () => {
+interface StudentManagementProps {
+  onNavigateToPassout?: () => void;
+}
+
+const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPassout }) => {
   const { students, addStudent, updateStudent, deleteStudent, getStudentDues } = useFee();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
@@ -107,7 +111,13 @@ const StudentManagement: React.FC = () => {
           <p className="text-muted-foreground">Manage student profiles and information</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <div className="flex space-x-3">
+          <Button variant="outline" onClick={onNavigateToPassout}>
+            <User className="h-4 w-4 mr-2" />
+            Passout Students
+          </Button>
+          
+           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={resetForm}>
               <Plus className="h-4 w-4 mr-2" />
@@ -217,8 +227,9 @@ const StudentManagement: React.FC = () => {
                 </Button>
               </div>
             </form>
-          </DialogContent>
-        </Dialog>
+           </DialogContent>
+         </Dialog>
+        </div>
       </div>
 
       {/* Search */}

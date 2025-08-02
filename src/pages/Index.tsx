@@ -6,6 +6,7 @@ import Dashboard from '@/components/Dashboard';
 import StudentManagement from '@/components/StudentManagement';
 import FeeStructureManagement from '@/components/FeeStructureManagement';
 import PaymentManagement from '@/components/PaymentManagement';
+import PassoutStudents from '@/components/PassoutStudents';
 
 const Index = () => {
   const { isAuthenticated } = useAuth();
@@ -20,11 +21,13 @@ const Index = () => {
       case 'dashboard':
         return <Dashboard />;
       case 'students':
-        return <StudentManagement />;
+        return <StudentManagement onNavigateToPassout={() => setCurrentPage('passout-students')} />;
       case 'fees':
         return <FeeStructureManagement />;
       case 'payments':
         return <PaymentManagement />;
+      case 'passout-students':
+        return <PassoutStudents onBack={() => setCurrentPage('students')} />;
       case 'settings':
         return (
           <div className="text-center py-12">
