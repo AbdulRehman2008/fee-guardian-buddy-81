@@ -39,7 +39,6 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
     parentName: '',
     parentContact: '',
     email: '',
-    admissionDate: '',
     graduationDate: '',
     finalGrade: '',
     achievements: ''
@@ -59,7 +58,6 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
       parentName: '',
       parentContact: '',
       email: '',
-      admissionDate: '',
       graduationDate: '',
       finalGrade: '',
       achievements: ''
@@ -97,7 +95,6 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
       parentName: student.parentName,
       parentContact: student.parentContact,
       email: student.email,
-      admissionDate: student.admissionDate,
       graduationDate: student.graduationDate,
       finalGrade: student.finalGrade || '',
       achievements: student.achievements || ''
@@ -212,27 +209,15 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="admissionDate">Admission Date</Label>
-                    <Input
-                      id="admissionDate"
-                      type="date"
-                      value={formData.admissionDate}
-                      onChange={(e) => setFormData({ ...formData, admissionDate: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="graduationDate">Graduation Date</Label>
-                    <Input
-                      id="graduationDate"
-                      type="date"
-                      value={formData.graduationDate}
-                      onChange={(e) => setFormData({ ...formData, graduationDate: e.target.value })}
-                      required
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="graduationDate">Graduation Date</Label>
+                  <Input
+                    id="graduationDate"
+                    type="date"
+                    value={formData.graduationDate}
+                    onChange={(e) => setFormData({ ...formData, graduationDate: e.target.value })}
+                    required
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -320,10 +305,6 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
                       <span className="truncate">{student.email}</span>
                     </div>
                   )}
-                  <div className="flex items-center text-sm">
-                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span>Admitted: {new Date(student.admissionDate).toLocaleDateString()}</span>
-                  </div>
                   <div className="flex items-center text-sm">
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span>Graduated: {new Date(student.graduationDate).toLocaleDateString()}</span>

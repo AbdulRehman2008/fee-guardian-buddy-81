@@ -28,8 +28,7 @@ const PaymentManagement: React.FC = () => {
     studentId: '',
     feeTypeId: '',
     amount: '',
-    date: new Date().toISOString().split('T')[0],
-    method: '' as 'cash' | 'card' | 'online' | 'check' | ''
+    date: new Date().toISOString().split('T')[0]
   });
 
   const filteredPayments = payments.filter(payment => {
@@ -43,15 +42,14 @@ const PaymentManagement: React.FC = () => {
       studentId: '',
       feeTypeId: '',
       amount: '',
-      date: new Date().toISOString().split('T')[0],
-      method: ''
+      date: new Date().toISOString().split('T')[0]
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.studentId || !formData.feeTypeId || !formData.amount || !formData.method) {
+    if (!formData.studentId || !formData.feeTypeId || !formData.amount) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
@@ -65,7 +63,7 @@ const PaymentManagement: React.FC = () => {
       feeTypeId: formData.feeTypeId,
       amount: parseFloat(formData.amount),
       date: formData.date,
-      method: formData.method,
+      method: 'cash',
       status: 'completed'
     });
 
@@ -322,21 +320,6 @@ const PaymentManagement: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                   required
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="method">Payment Method</Label>
-                <Select value={formData.method} onValueChange={(value: any) => setFormData({ ...formData, method: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select payment method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cash">Cash</SelectItem>
-                    <SelectItem value="card">Card</SelectItem>
-                    <SelectItem value="online">Online Transfer</SelectItem>
-                    <SelectItem value="check">Check</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
 
               <div className="flex space-x-2 pt-4">

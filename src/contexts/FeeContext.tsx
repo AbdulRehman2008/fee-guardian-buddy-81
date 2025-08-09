@@ -11,7 +11,14 @@ export interface Student {
   admissionDate: string;
 }
 
-export interface PassoutStudent extends Student {
+export interface PassoutStudent {
+  id: string;
+  name: string;
+  whatsappNumber: string;
+  course: string;
+  parentName: string;
+  parentContact: string;
+  email: string;
   graduationDate: string;
   finalGrade?: string;
   achievements?: string;

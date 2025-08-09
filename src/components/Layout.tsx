@@ -23,9 +23,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate }) =>
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'students', label: 'Students', icon: Users },
-    { id: 'fees', label: 'Fee Management', icon: CreditCard },
     { id: 'payments', label: 'Payments', icon: FileText },
-    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   return (
