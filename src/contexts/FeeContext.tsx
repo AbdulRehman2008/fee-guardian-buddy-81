@@ -3,9 +3,8 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 export interface Student {
   id: string;
   name: string;
-  rollNumber: string;
-  class: string;
-  section: string;
+  whatsappNumber: string;
+  course: string;
   parentName: string;
   parentContact: string;
   email: string;
@@ -29,7 +28,7 @@ export interface FeeType {
 export interface FeeStructure {
   id: string;
   name: string;
-  class: string;
+  course: string;
   feeTypes: FeeType[];
   totalAmount: number;
 }
@@ -82,9 +81,8 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
     {
       id: '1',
       name: 'John Doe',
-      rollNumber: '2024001',
-      class: '10',
-      section: 'A',
+      whatsappNumber: '+1234567890',
+      course: 'web',
       parentName: 'Robert Doe',
       parentContact: '+1234567890',
       email: 'john.doe@email.com',
@@ -93,9 +91,8 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
     {
       id: '2',
       name: 'Jane Smith',
-      rollNumber: '2024002',
-      class: '10',
-      section: 'B',
+      whatsappNumber: '+1234567891',
+      course: 'graphics',
       parentName: 'Michael Smith',
       parentContact: '+1234567891',
       email: 'jane.smith@email.com',
@@ -108,8 +105,8 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
   const [feeStructures, setFeeStructures] = useState<FeeStructure[]>([
     {
       id: '1',
-      name: 'Class 10 Fee Structure',
-      class: '10',
+      name: 'Web Development Fee Structure',
+      course: 'web',
       feeTypes: [
         { id: '1', name: 'Tuition Fee', amount: 5000, frequency: 'monthly', category: 'tuition' },
         { id: '2', name: 'Transport Fee', amount: 1500, frequency: 'monthly', category: 'transport' },
@@ -199,7 +196,7 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
     const student = students.find(s => s.id === studentId);
     if (!student) return 0;
 
-    const structure = feeStructures.find(fs => fs.class === student.class);
+    const structure = feeStructures.find(fs => fs.course === student.course);
     if (!structure) return 0;
 
     const studentPayments = payments.filter(p => p.studentId === studentId && p.status === 'completed');

@@ -3,6 +3,7 @@ import { useFee, Student } from '@/contexts/FeeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -30,9 +31,8 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    rollNumber: '',
-    class: '',
-    section: '',
+    whatsappNumber: '',
+    course: '',
     parentName: '',
     parentContact: '',
     email: '',
@@ -41,16 +41,15 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
 
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.class.includes(searchTerm)
+    student.whatsappNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.course.includes(searchTerm)
   );
 
   const resetForm = () => {
     setFormData({
       name: '',
-      rollNumber: '',
-      class: '',
-      section: '',
+      whatsappNumber: '',
+      course: '',
       parentName: '',
       parentContact: '',
       email: '',
@@ -84,9 +83,8 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
     setEditingStudent(student);
     setFormData({
       name: student.name,
-      rollNumber: student.rollNumber,
-      class: student.class,
-      section: student.section,
+      whatsappNumber: student.whatsappNumber,
+      course: student.course,
       parentName: student.parentName,
       parentContact: student.parentContact,
       email: student.email,
@@ -142,35 +140,29 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="rollNumber">Roll Number</Label>
+                  <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
                   <Input
-                    id="rollNumber"
-                    value={formData.rollNumber}
-                    onChange={(e) => setFormData({ ...formData, rollNumber: e.target.value })}
+                    id="whatsappNumber"
+                    value={formData.whatsappNumber}
+                    onChange={(e) => setFormData({ ...formData, whatsappNumber: e.target.value })}
+                    placeholder="+1234567890"
                     required
                   />
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="class">Class</Label>
-                  <Input
-                    id="class"
-                    value={formData.class}
-                    onChange={(e) => setFormData({ ...formData, class: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="section">Section</Label>
-                  <Input
-                    id="section"
-                    value={formData.section}
-                    onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    required
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="course">Course</Label>
+                <Select value={formData.course} onValueChange={(value) => setFormData({ ...formData, course: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select course" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="web">Web Development</SelectItem>
+                    <SelectItem value="graphics">Graphics Design</SelectItem>
+                    <SelectItem value="wsoffice">MS Office</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -236,7 +228,7 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search students by name, roll number, or class..."
+          placeholder="Search students by name, WhatsApp number, or course..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
@@ -254,11 +246,11 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
                   <div>
                     <CardTitle className="text-lg">{student.name}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Roll: {student.rollNumber}
+                      WhatsApp: {student.whatsappNumber}
                     </p>
                   </div>
                   <Badge variant={dues > 0 ? "destructive" : "default"}>
-                    Class {student.class}-{student.section}
+                    {student.course === 'web' ? 'Web Dev' : student.course === 'graphics' ? 'Graphics' : 'MS Office'}
                   </Badge>
                 </div>
               </CardHeader>

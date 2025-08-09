@@ -78,9 +78,9 @@ const PaymentManagement: React.FC = () => {
     setIsDialogOpen(false);
   };
 
-  const getStudentClass = (studentId: string) => {
+  const getStudentCourse = (studentId: string) => {
     const student = students.find(s => s.id === studentId);
-    return student ? `${student.class}-${student.section}` : '';
+    return student ? (student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office') : '';
   };
 
   const getFeeTypeName = (feeTypeId: string) => {
@@ -95,7 +95,7 @@ const PaymentManagement: React.FC = () => {
     const student = students.find(s => s.id === studentId);
     if (!student) return [];
 
-    const structure = feeStructures.find(fs => fs.class === student.class);
+    const structure = feeStructures.find(fs => fs.course === student.course);
     return structure ? structure.feeTypes : [];
   };
 
@@ -109,7 +109,7 @@ const PaymentManagement: React.FC = () => {
       Date: ${new Date(payment.date).toLocaleDateString()}
       
       Student: ${student?.name}
-      Class: ${getStudentClass(payment.studentId)}
+      Course: ${getStudentCourse(payment.studentId)}
       
       Fee Type: ${feeTypeName}
       Amount: ₹${payment.amount.toLocaleString()}
@@ -139,7 +139,7 @@ const PaymentManagement: React.FC = () => {
     }
 
     const studentPayments = payments.filter(p => p.studentId === studentId && p.status === 'completed');
-    const structure = feeStructures.find(fs => fs.class === student.class);
+    const structure = feeStructures.find(fs => fs.course === student.course);
     
     // Group payments by month and year
     const paymentsByMonth = studentPayments.reduce((acc, payment) => {
@@ -161,14 +161,14 @@ const PaymentManagement: React.FC = () => {
       
       Student Details:
       Name: ${student.name}
-      Roll Number: ${student.rollNumber}
-      Class: ${student.class}-${student.section}
+      WhatsApp Number: ${student.whatsappNumber}
+      Course: ${student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}
       Parent: ${student.parentName}
       Contact: ${student.parentContact}
       Email: ${student.email}
       Admission Date: ${new Date(student.admissionDate).toLocaleDateString()}
       
-      Fee Structure (Class ${student.class}):`;
+      Fee Structure (${student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}):`;
       
     if (structure) {
       invoiceContent += `\n      Structure: ${structure.name}`;
@@ -269,7 +269,7 @@ const PaymentManagement: React.FC = () => {
                   <SelectContent>
                     {students.map((student) => (
                       <SelectItem key={student.id} value={student.id}>
-                        {student.name} - Class {student.class}-{student.section}
+                        {student.name} - {student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -379,7 +379,7 @@ const PaymentManagement: React.FC = () => {
                   <div className="space-y-3">
                     <div>
                       <h4 className="font-medium text-foreground">{student.name}</h4>
-                      <p className="text-sm text-muted-foreground">Class {student.class}-{student.section}</p>
+                      <p className="text-sm text-muted-foreground">Course: {student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}</p>
                     </div>
                     <div className="text-xs text-muted-foreground">
                       <p>Months Paid: {monthsPaid}</p>
@@ -430,7 +430,7 @@ const PaymentManagement: React.FC = () => {
                     <div>
                       <h3 className="font-medium text-foreground">{student?.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        Class {getStudentClass(payment.studentId)} • {feeTypeName}
+                        Course: {getStudentCourse(payment.studentId)} • {feeTypeName}
                       </p>
                     </div>
                   </div>

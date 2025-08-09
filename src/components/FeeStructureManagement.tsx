@@ -26,7 +26,7 @@ const FeeStructureManagement: React.FC = () => {
   const [editingStructure, setEditingStructure] = useState<FeeStructure | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    class: '',
+    course: '',
     feeTypes: [] as FeeType[]
   });
   const [currentFeeType, setCurrentFeeType] = useState({
@@ -39,7 +39,7 @@ const FeeStructureManagement: React.FC = () => {
   const resetForm = () => {
     setFormData({
       name: '',
-      class: '',
+      course: '',
       feeTypes: []
     });
     setCurrentFeeType({
@@ -54,7 +54,7 @@ const FeeStructureManagement: React.FC = () => {
   const handleEdit = (structure: FeeStructure) => {
     setFormData({
       name: structure.name,
-      class: structure.class,
+      course: structure.course,
       feeTypes: structure.feeTypes
     });
     setEditingStructure(structure);
@@ -112,7 +112,7 @@ const FeeStructureManagement: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.class || formData.feeTypes.length === 0) {
+    if (!formData.name || !formData.course || formData.feeTypes.length === 0) {
       toast({
         title: "Error",
         description: "Please fill in all required fields and add at least one fee type.",
@@ -127,7 +127,7 @@ const FeeStructureManagement: React.FC = () => {
       // Update existing structure
       updateFeeStructure(editingStructure.id, {
         name: formData.name,
-        class: formData.class,
+        course: formData.course,
         feeTypes: formData.feeTypes,
         totalAmount
       });
@@ -140,7 +140,7 @@ const FeeStructureManagement: React.FC = () => {
       // Create new structure
       addFeeStructure({
         name: formData.name,
-        class: formData.class,
+        course: formData.course,
         feeTypes: formData.feeTypes,
         totalAmount
       });
@@ -217,14 +217,17 @@ const FeeStructureManagement: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="class">Class</Label>
-                  <Input
-                    id="class"
-                    value={formData.class}
-                    onChange={(e) => setFormData({ ...formData, class: e.target.value })}
-                    placeholder="e.g., 10"
-                    required
-                  />
+                  <Label htmlFor="course">Course</Label>
+                  <Select value={formData.course} onValueChange={(value) => setFormData({ ...formData, course: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="web">Web Development</SelectItem>
+                      <SelectItem value="graphics">Graphics Design</SelectItem>
+                      <SelectItem value="wsoffice">MS Office</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -354,7 +357,10 @@ const FeeStructureManagement: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{structure.name}</span>
-                <Badge variant="outline">Class {structure.class}</Badge>
+                <Badge variant="outline">
+                  {structure.course === 'web' ? 'Web Development' : 
+                   structure.course === 'graphics' ? 'Graphics Design' : 'MS Office'}
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

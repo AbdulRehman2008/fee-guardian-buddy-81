@@ -134,7 +134,7 @@ const Dashboard: React.FC = () => {
                   <div key={student.id} className="flex items-center justify-between p-3 bg-warning/10 rounded-lg border border-warning/20">
                     <div>
                       <p className="font-medium text-foreground">{student.name}</p>
-                      <p className="text-sm text-muted-foreground">Class {student.class}-{student.section}</p>
+                      <p className="text-sm text-muted-foreground">Course: {student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-warning">₹{dues.toLocaleString()}</p>
