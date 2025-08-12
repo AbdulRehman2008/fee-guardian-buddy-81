@@ -26,7 +26,6 @@ const PaymentManagement: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     studentId: '',
-    feeTypeId: '',
     amount: '',
     date: new Date().toISOString().split('T')[0]
   });
@@ -40,7 +39,6 @@ const PaymentManagement: React.FC = () => {
   const resetForm = () => {
     setFormData({
       studentId: '',
-      feeTypeId: '',
       amount: '',
       date: new Date().toISOString().split('T')[0]
     });
@@ -49,7 +47,7 @@ const PaymentManagement: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.studentId || !formData.feeTypeId || !formData.amount) {
+    if (!formData.studentId || !formData.amount) {
       toast({
         title: "Error",
         description: "Please fill in all required fields.",
@@ -60,7 +58,7 @@ const PaymentManagement: React.FC = () => {
 
     addPayment({
       studentId: formData.studentId,
-      feeTypeId: formData.feeTypeId,
+      feeTypeId: 'general-fee',
       amount: parseFloat(formData.amount),
       date: formData.date,
       method: 'cash',
@@ -260,7 +258,7 @@ const PaymentManagement: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="student">Student</Label>
-                <Select value={formData.studentId} onValueChange={(value) => setFormData({ ...formData, studentId: value, feeTypeId: '' })}>
+                <Select value={formData.studentId} onValueChange={(value) => setFormData({ ...formData, studentId: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a student" />
                   </SelectTrigger>
@@ -273,32 +271,6 @@ const PaymentManagement: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-
-              {formData.studentId && (
-                <div className="space-y-2">
-                  <Label htmlFor="feeType">Fee Type</Label>
-                  <Select value={formData.feeTypeId} onValueChange={(value) => {
-                    const feeTypes = getAvailableFeeTypes(formData.studentId);
-                    const selectedFee = feeTypes.find(ft => ft.id === value);
-                    setFormData({ 
-                      ...formData, 
-                      feeTypeId: value,
-                      amount: selectedFee ? selectedFee.amount.toString() : ''
-                    });
-                  }}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select fee type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getAvailableFeeTypes(formData.studentId).map((feeType) => (
-                        <SelectItem key={feeType.id} value={feeType.id}>
-                          {feeType.name} - ₹{feeType.amount.toLocaleString()}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
 
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount</Label>

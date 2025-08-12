@@ -56,7 +56,7 @@ interface FeeContextType {
   passoutStudents: PassoutStudent[];
   feeStructures: FeeStructure[];
   payments: Payment[];
-  addStudent: (student: Omit<Student, 'id'>) => void;
+  addStudent: (student: Omit<Student, 'id'>) => string;
   updateStudent: (id: string, student: Partial<Student>) => void;
   deleteStudent: (id: string) => void;
   addPassoutStudent: (student: Omit<PassoutStudent, 'id'>) => void;
@@ -142,6 +142,7 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
       id: Date.now().toString()
     };
     setStudents(prev => [...prev, newStudent]);
+    return newStudent.id;
   };
 
   const updateStudent = (id: string, studentData: Partial<Student>) => {

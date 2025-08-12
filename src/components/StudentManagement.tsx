@@ -24,7 +24,7 @@ interface StudentManagementProps {
 }
 
 const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPassout }) => {
-  const { students, addStudent, updateStudent, deleteStudent, getStudentDues } = useFee();
+  const { students, addStudent, updateStudent, deleteStudent, getStudentDues, addPayment } = useFee();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -36,7 +36,8 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
     parentName: '',
     parentContact: '',
     email: '',
-    admissionDate: ''
+    admissionDate: '',
+    feeAmount: ''
   });
 
   const filteredStudents = students.filter(student =>
@@ -53,7 +54,8 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
       parentName: '',
       parentContact: '',
       email: '',
-      admissionDate: ''
+      admissionDate: '',
+      feeAmount: ''
     });
     setEditingStudent(null);
   };
@@ -62,13 +64,42 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
     e.preventDefault();
     
     if (editingStudent) {
-      updateStudent(editingStudent.id, formData);
+      updateStudent(editingStudent.id, {
+        name: formData.name,
+        whatsappNumber: formData.whatsappNumber,
+        course: formData.course,
+        parentName: formData.parentName,
+        parentContact: formData.parentContact,
+        email: formData.email,
+        admissionDate: formData.admissionDate
+      });
       toast({
         title: "Student Updated",
         description: "Student information has been updated successfully.",
       });
     } else {
-      addStudent(formData);
+      const newStudentId = addStudent({
+        name: formData.name,
+        whatsappNumber: formData.whatsappNumber,
+        course: formData.course,
+        parentName: formData.parentName,
+        parentContact: formData.parentContact,
+        email: formData.email,
+        admissionDate: formData.admissionDate
+      });
+      
+      // If fee amount is provided, create a payment record
+      if (formData.feeAmount && parseFloat(formData.feeAmount) > 0) {
+        addPayment({
+          studentId: newStudentId,
+          feeTypeId: 'general-fee',
+          amount: parseFloat(formData.feeAmount),
+          date: new Date().toISOString().split('T')[0],
+          method: 'cash',
+          status: 'completed'
+        });
+      }
+      
       toast({
         title: "Student Added",
         description: "New student has been added successfully.",
@@ -88,7 +119,8 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
       parentName: student.parentName,
       parentContact: student.parentContact,
       email: student.email,
-      admissionDate: student.admissionDate
+      admissionDate: student.admissionDate,
+      feeAmount: ''
     });
     setIsDialogOpen(true);
   };
@@ -205,6 +237,19 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
                   required
                 />
               </div>
+
+              {!editingStudent && (
+                <div className="space-y-2">
+                  <Label htmlFor="feeAmount">Fee Amount (Optional)</Label>
+                  <Input
+                    id="feeAmount"
+                    type="number"
+                    value={formData.feeAmount}
+                    onChange={(e) => setFormData({ ...formData, feeAmount: e.target.value })}
+                    placeholder="Enter fee amount"
+                  />
+                </div>
+              )}
 
               <div className="flex space-x-2 pt-4">
                 <Button type="submit" className="flex-1">
