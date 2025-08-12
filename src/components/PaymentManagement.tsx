@@ -237,21 +237,21 @@ const PaymentManagement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Payment Management</h2>
-          <p className="text-muted-foreground">Record and track fee payments</p>
+          <h2 className="text-xl lg:text-2xl font-bold text-foreground">Payment Management</h2>
+          <p className="text-sm lg:text-base text-muted-foreground">Record and track fee payments</p>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm}>
+            <Button onClick={resetForm} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Record Payment
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md mx-4 w-full max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Record New Payment</DialogTitle>
             </DialogHeader>
@@ -320,7 +320,7 @@ const PaymentManagement: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {students.map((student) => {
               const studentPayments = payments.filter(p => p.studentId === student.id && p.status === 'completed');
               const monthsPaid = [...new Set(studentPayments.map(p => {
@@ -330,11 +330,11 @@ const PaymentManagement: React.FC = () => {
               const totalPaid = studentPayments.reduce((sum, p) => sum + p.amount, 0);
 
               return (
-                <Card key={student.id} className="p-4">
+                <Card key={student.id} className="p-3 lg:p-4">
                   <div className="space-y-3">
                     <div>
-                      <h4 className="font-medium text-foreground">{student.name}</h4>
-                      <p className="text-sm text-muted-foreground">Course: {student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}</p>
+                      <h4 className="font-medium text-foreground text-sm lg:text-base truncate">{student.name}</h4>
+                      <p className="text-xs lg:text-sm text-muted-foreground">Course: {student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}</p>
                     </div>
                     <div className="text-xs text-muted-foreground">
                       <p>Months Paid: {monthsPaid}</p>
@@ -344,9 +344,9 @@ const PaymentManagement: React.FC = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => generateStudentInvoice(student.id)}
-                      className="w-full"
+                      className="w-full text-xs lg:text-sm"
                     >
-                      <FileText className="h-4 w-4 mr-2" />
+                      <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
                       Generate Invoice
                     </Button>
                   </div>
@@ -376,43 +376,44 @@ const PaymentManagement: React.FC = () => {
           
           return (
             <Card key={payment.id}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
+              <CardContent className="p-4 lg:p-6">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <div className="flex items-center space-x-3 lg:space-x-4">
                     <div className="p-2 bg-primary/10 rounded-lg">
-                      <CreditCard className="h-5 w-5 text-primary" />
+                      <CreditCard className="h-4 w-4 lg:h-5 lg:w-5 text-primary" />
                     </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">{student?.name}</h3>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-foreground text-sm lg:text-base truncate">{student?.name}</h3>
+                      <p className="text-xs lg:text-sm text-muted-foreground">
                         Course: {getStudentCourse(payment.studentId)} • {feeTypeName}
                       </p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4">
+                    <div className="text-left sm:text-right">
                       <p className="text-lg font-semibold text-foreground">₹{payment.amount.toLocaleString()}</p>
-                      <p className="text-sm text-muted-foreground capitalize">{payment.method}</p>
+                      <p className="text-xs lg:text-sm text-muted-foreground capitalize">{payment.method}</p>
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'}>
+                      <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
                         {payment.status}
                       </Badge>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => generateReceipt(payment)}
+                        className="text-xs lg:text-sm"
                       >
-                        <Receipt className="h-4 w-4 mr-1" />
-                        Receipt
+                        <Receipt className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                        <span className="hidden sm:inline">Receipt</span>
                       </Button>
                     </div>
                   </div>
                 </div>
                 
-                <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs lg:text-sm text-muted-foreground">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-1" />
                     {new Date(payment.date).toLocaleDateString()}

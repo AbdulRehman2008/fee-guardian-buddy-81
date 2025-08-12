@@ -134,27 +134,27 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Student Management</h2>
-          <p className="text-muted-foreground">Manage student profiles and information</p>
+          <h2 className="text-xl lg:text-2xl font-bold text-foreground">Student Management</h2>
+          <p className="text-sm lg:text-base text-muted-foreground">Manage student profiles and information</p>
         </div>
         
-        <div className="flex space-x-3">
-          <Button variant="outline" onClick={onNavigateToPassout}>
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+          <Button variant="outline" onClick={onNavigateToPassout} className="w-full sm:w-auto">
             <User className="h-4 w-4 mr-2" />
             Passout Students
           </Button>
           
            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm}>
+            <Button onClick={resetForm} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Student
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md mx-4 w-full max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingStudent ? 'Edit Student' : 'Add New Student'}
@@ -281,13 +281,13 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
       </div>
 
       {/* Students Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
         {filteredStudents.map((student) => {
           const dues = getStudentDues(student.id);
           return (
-            <Card key={student.id}>
+            <Card key={student.id} className="h-full">
               <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start gap-2">
                   <div>
                     <CardTitle className="text-lg">{student.name}</CardTitle>
                     <p className="text-sm text-muted-foreground">
@@ -329,7 +329,7 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
                   </div>
                 )}
 
-                <div className="flex space-x-2 pt-2">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 pt-2">
                   <Button 
                     size="sm" 
                     variant="outline" 
@@ -343,7 +343,7 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
                     size="sm" 
                     variant="outline" 
                     onClick={() => handleDelete(student.id)}
-                    className="text-destructive hover:text-destructive"
+                    className="text-destructive hover:text-destructive sm:w-auto"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

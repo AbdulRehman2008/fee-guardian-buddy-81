@@ -111,32 +111,32 @@ const PassoutStudents: React.FC<PassoutStudentsProps> = ({ onBack }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={onBack}>
+    <div className="space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+          <Button variant="outline" onClick={onBack} className="w-fit">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Students
           </Button>
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Passout Students</h2>
-            <p className="text-muted-foreground">View details of graduated students</p>
+            <h2 className="text-xl lg:text-2xl font-bold text-foreground">Passout Students</h2>
+            <p className="text-sm lg:text-base text-muted-foreground">View details of graduated students</p>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <Badge variant="secondary" className="text-lg px-4 py-2">
-            <GraduationCap className="h-4 w-4 mr-2" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+          <Badge variant="secondary" className="text-sm lg:text-lg px-3 py-1 lg:px-4 lg:py-2 w-fit">
+            <GraduationCap className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
             {passoutStudents.length} Graduates
           </Badge>
           
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={resetForm}>
+              <Button onClick={resetForm} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Passout Student
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-lg mx-4 w-full max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingStudent ? 'Edit Passout Student' : 'Add New Passout Student'}

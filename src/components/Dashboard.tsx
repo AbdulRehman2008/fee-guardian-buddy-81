@@ -60,25 +60,25 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-foreground">Dashboard</h2>
-        <p className="text-muted-foreground">Overview of your school's fee management</p>
+        <h2 className="text-xl lg:text-2xl font-bold text-foreground">Dashboard</h2>
+        <p className="text-sm lg:text-base text-muted-foreground">Overview of your school's fee management</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {stats.map((stat) => (
           <Card key={stat.title}>
-            <CardContent className="p-6">
+            <CardContent className="p-4 lg:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-xs lg:text-sm font-medium text-muted-foreground">{stat.title}</p>
+                  <p className="text-xl lg:text-2xl font-bold text-foreground">{stat.value}</p>
                   <p className="text-xs text-success mt-1">{stat.change} from last month</p>
                 </div>
-                <div className={`p-3 rounded-lg ${stat.color}`}>
-                  <stat.icon className="h-6 w-6 text-white" />
+                <div className={`p-2 lg:p-3 rounded-lg ${stat.color}`}>
+                  <stat.icon className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
                 </div>
               </div>
             </CardContent>
@@ -86,28 +86,28 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Recent Payments */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calendar className="h-5 w-5 mr-2" />
+            <CardTitle className="flex items-center text-lg lg:text-xl">
+              <Calendar className="h-4 w-4 lg:h-5 lg:w-5 mr-2" />
               Recent Payments
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 lg:space-y-4">
               {recentPayments.map((payment) => {
                 const student = students.find(s => s.id === payment.studentId);
                 return (
                   <div key={payment.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-foreground">{student?.name}</p>
-                      <p className="text-sm text-muted-foreground">{payment.receiptNumber}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-foreground text-sm lg:text-base truncate">{student?.name}</p>
+                      <p className="text-xs lg:text-sm text-muted-foreground">{payment.receiptNumber}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-medium text-foreground">₹{payment.amount.toLocaleString()}</p>
-                      <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'}>
+                    <div className="text-right ml-2">
+                      <p className="font-medium text-foreground text-sm lg:text-base">₹{payment.amount.toLocaleString()}</p>
+                      <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
                         {payment.status}
                       </Badge>
                     </div>
@@ -121,23 +121,23 @@ const Dashboard: React.FC = () => {
         {/* Students with Dues */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2 text-warning" />
+            <CardTitle className="flex items-center text-lg lg:text-xl">
+              <AlertCircle className="h-4 w-4 lg:h-5 lg:w-5 mr-2 text-warning" />
               Students with Outstanding Dues
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 lg:space-y-4">
               {overdueStudents.slice(0, 5).map((student) => {
                 const dues = getStudentDues(student.id);
                 return (
                   <div key={student.id} className="flex items-center justify-between p-3 bg-warning/10 rounded-lg border border-warning/20">
-                    <div>
-                      <p className="font-medium text-foreground">{student.name}</p>
-                      <p className="text-sm text-muted-foreground">Course: {student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-foreground text-sm lg:text-base truncate">{student.name}</p>
+                      <p className="text-xs lg:text-sm text-muted-foreground">Course: {student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-medium text-warning">₹{dues.toLocaleString()}</p>
+                    <div className="text-right ml-2">
+                      <p className="font-medium text-warning text-sm lg:text-base">₹{dues.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground">Outstanding</p>
                     </div>
                   </div>

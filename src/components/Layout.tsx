@@ -1,15 +1,8 @@
 import React, { ReactNode } from 'react';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { 
-  LayoutDashboard, 
-  Users, 
-  CreditCard, 
-  FileText, 
-  Settings,
-  LogOut,
-  GraduationCap
-} from 'lucide-react';
+import { GraduationCap, Menu } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,66 +11,63 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate }) => {
-  const { user, logout } = useAuth();
-
-  const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'students', label: 'Students', icon: Users },
-    { id: 'payments', label: 'Payments', icon: FileText },
-  ];
+  const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-secondary/20">
-      {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-primary rounded-lg">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-secondary/20">
+        <AppSidebar currentPage={currentPage} onNavigate={onNavigate} />
+        
+        <div className="flex-1 flex flex-col">
+          {/* Mobile Header */}
+          <header className="lg:hidden bg-card border-b border-border px-4 py-3">
+            <div className="flex items-center justify-between">
+              <SidebarTrigger className="p-2">
+                <Menu className="h-5 w-5" />
+              </SidebarTrigger>
+              
+              <div className="flex items-center space-x-2">
+                <div className="p-1.5 bg-primary rounded-lg">
+                  <GraduationCap className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <span className="text-sm font-semibold text-foreground">EduFee Manager</span>
+              </div>
+              
+              <div className="text-right">
+                <p className="text-xs font-medium text-foreground truncate max-w-20">{user?.name}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">EduFee Manager</h1>
-              <p className="text-sm text-muted-foreground">School Fee Management System</p>
+          </header>
+
+          {/* Desktop Header */}
+          <header className="hidden lg:block bg-card border-b border-border px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <SidebarTrigger className="p-2">
+                  <Menu className="h-5 w-5" />
+                </SidebarTrigger>
+                <div>
+                  <h1 className="text-xl font-bold text-foreground">EduFee Manager</h1>
+                  <p className="text-sm text-muted-foreground">School Fee Management System</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-foreground">{user?.name}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="text-right">
-              <p className="text-sm font-medium text-foreground">{user?.name}</p>
-              <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
-            </div>
-            <Button variant="outline" size="sm" onClick={logout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 p-4 lg:p-6 overflow-auto">
+            {children}
+          </main>
         </div>
-      </header>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <nav className="w-64 bg-card border-r border-border h-[calc(100vh-73px)] p-4">
-          <div className="space-y-2">
-            {navigationItems.map((item) => (
-              <Button
-                key={item.id}
-                variant={currentPage === item.id ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => onNavigate(item.id)}
-              >
-                <item.icon className="h-4 w-4 mr-3" />
-                {item.label}
-              </Button>
-            ))}
-          </div>
-        </nav>
-
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {children}
-        </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
