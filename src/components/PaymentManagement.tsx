@@ -278,12 +278,12 @@ const PaymentManagement: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="student">Student</Label>
                 <Select value={formData.studentId} onValueChange={(value) => setFormData({ ...formData, studentId: value })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-input">
                     <SelectValue placeholder="Select a student" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background border-border shadow-lg z-50 max-h-60 overflow-y-auto">
                     {students.map((student) => (
-                      <SelectItem key={student.id} value={student.id}>
+                      <SelectItem key={student.id} value={student.id} className="hover:bg-accent">
                         {student.name} - {student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}
                       </SelectItem>
                     ))}
@@ -389,11 +389,11 @@ const PaymentManagement: React.FC = () => {
         </div>
         <div className="w-full sm:w-48">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger>
+            <SelectTrigger className="bg-background border-input">
               <SelectValue placeholder="Filter by month" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All months</SelectItem>
+            <SelectContent className="bg-background border-border shadow-lg z-50">
+              <SelectItem value="" className="hover:bg-accent">All months</SelectItem>
               {availableMonths.map((month) => {
                 const [year, monthNum] = month.split('-');
                 const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleDateString('en-US', { 
@@ -401,7 +401,7 @@ const PaymentManagement: React.FC = () => {
                   year: 'numeric' 
                 });
                 return (
-                  <SelectItem key={month} value={month}>
+                  <SelectItem key={month} value={month} className="hover:bg-accent">
                     {monthName}
                   </SelectItem>
                 );
