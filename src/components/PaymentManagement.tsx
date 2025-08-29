@@ -23,7 +23,7 @@ const PaymentManagement: React.FC = () => {
   const { students, payments, feeStructures, addPayment } = useFee();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     studentId: '',
@@ -47,7 +47,7 @@ const PaymentManagement: React.FC = () => {
     const searchMatch = student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
            payment.receiptNumber.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (!selectedMonth) return searchMatch;
+    if (selectedMonth === 'all') return searchMatch;
     
     const paymentDate = new Date(payment.date);
     const paymentMonth = `${paymentDate.getFullYear()}-${String(paymentDate.getMonth() + 1).padStart(2, '0')}`;
@@ -393,7 +393,7 @@ const PaymentManagement: React.FC = () => {
               <SelectValue placeholder="Filter by month" />
             </SelectTrigger>
             <SelectContent className="bg-background border-border shadow-lg z-50">
-              <SelectItem value="" className="hover:bg-accent">All months</SelectItem>
+              <SelectItem value="all" className="hover:bg-accent">All months</SelectItem>
               {availableMonths.map((month) => {
                 const [year, monthNum] = month.split('-');
                 const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleDateString('en-US', { 
