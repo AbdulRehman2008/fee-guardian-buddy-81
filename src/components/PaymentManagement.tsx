@@ -23,6 +23,7 @@ const PaymentManagement: React.FC = () => {
   const { students, payments, feeStructures, addPayment } = useFee();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     studentId: '',
@@ -30,10 +31,28 @@ const PaymentManagement: React.FC = () => {
     date: new Date().toISOString().split('T')[0]
   });
 
+  // Generate available months from payments
+  const availableMonths = React.useMemo(() => {
+    const months = new Set<string>();
+    payments.forEach(payment => {
+      const date = new Date(payment.date);
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      months.add(monthYear);
+    });
+    return Array.from(months).sort().reverse(); // Most recent first
+  }, [payments]);
+
   const filteredPayments = payments.filter(payment => {
     const student = students.find(s => s.id === payment.studentId);
-    return student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const searchMatch = student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
            payment.receiptNumber.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (!selectedMonth) return searchMatch;
+    
+    const paymentDate = new Date(payment.date);
+    const paymentMonth = `${paymentDate.getFullYear()}-${String(paymentDate.getMonth() + 1).padStart(2, '0')}`;
+    
+    return searchMatch && paymentMonth === selectedMonth;
   });
 
   const resetForm = () => {
@@ -357,15 +376,39 @@ const PaymentManagement: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search payments by student name or receipt number..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      {/* Search and Filter */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search payments by student name or receipt number..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <div className="w-full sm:w-48">
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by month" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All months</SelectItem>
+              {availableMonths.map((month) => {
+                const [year, monthNum] = month.split('-');
+                const monthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleDateString('en-US', { 
+                  month: 'long', 
+                  year: 'numeric' 
+                });
+                return (
+                  <SelectItem key={month} value={month}>
+                    {monthName}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Payments List */}
