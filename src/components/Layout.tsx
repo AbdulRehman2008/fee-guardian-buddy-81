@@ -2,7 +2,8 @@ import React, { ReactNode } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useAuth } from '@/contexts/AuthContext';
-import { GraduationCap, Menu } from 'lucide-react';
+import { GraduationCap, Menu, Shield, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface LayoutProps {
   children: ReactNode;
@@ -11,7 +12,16 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate }) => {
-  const { user } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
+
+  // If user is not admin, they shouldn't be here
+  if (!isAdmin) {
+    return null;
+  }
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <SidebarProvider>
@@ -33,8 +43,22 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate }) =>
                 <span className="text-sm font-semibold text-foreground">EduFee Manager</span>
               </div>
               
-              <div className="text-right">
-                <p className="text-xs font-medium text-foreground truncate max-w-20">{user?.name}</p>
+              <div className="flex items-center space-x-2">
+                <div className="text-right">
+                  <p className="text-xs font-medium text-foreground truncate max-w-20">{user?.name}</p>
+                  <div className="flex items-center space-x-1">
+                    <Shield className="h-3 w-3 text-primary" />
+                    <span className="text-xs text-primary font-medium">Admin</span>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="h-8 w-8 p-0"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </header>
@@ -55,8 +79,20 @@ const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate }) =>
               <div className="flex items-center space-x-4">
                 <div className="text-right">
                   <p className="text-sm font-medium text-foreground">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                  <div className="flex items-center space-x-1">
+                    <Shield className="h-3 w-3 text-primary" />
+                    <span className="text-xs text-primary font-medium">Administrator</span>
+                  </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </Button>
               </div>
             </div>
           </header>

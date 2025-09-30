@@ -127,7 +127,7 @@ const PaymentManagement: React.FC = () => {
       Course: ${getStudentCourse(payment.studentId)}
       
       Fee Type: ${feeTypeName}
-      Amount: ₹${payment.amount.toLocaleString()}
+      Amount: Rs${payment.amount.toLocaleString()}
       Payment Method: ${payment.method.toUpperCase()}
       
       Status: ${payment.status.toUpperCase()}
@@ -188,9 +188,9 @@ const PaymentManagement: React.FC = () => {
     if (structure) {
       invoiceContent += `\n      Structure: ${structure.name}`;
       structure.feeTypes.forEach(feeType => {
-        invoiceContent += `\n      ${feeType.name}: ₹${feeType.amount.toLocaleString()} (${feeType.frequency})`;
+        invoiceContent += `\n      ${feeType.name}: Rs${feeType.amount.toLocaleString()} (${feeType.frequency})`;
       });
-      invoiceContent += `\n      Total Monthly Fee: ₹${structure.totalAmount.toLocaleString()}`;
+      invoiceContent += `\n      Total Monthly Fee: Rs${structure.totalAmount.toLocaleString()}`;
     }
     
     invoiceContent += `\n      
@@ -203,7 +203,7 @@ const PaymentManagement: React.FC = () => {
       invoiceContent += `\n      
       No payments recorded yet.
       
-      Outstanding Amount: ₹${structure ? structure.totalAmount.toLocaleString() : '0'}`;
+      Outstanding Amount: Rs${structure ? structure.totalAmount.toLocaleString() : '0'}`;
     } else {
       sortedMonths.forEach(monthYear => {
         const [year, month] = monthYear.split('-');
@@ -217,12 +217,12 @@ const PaymentManagement: React.FC = () => {
         let monthTotal = 0;
         paymentsByMonth[monthYear].forEach(payment => {
           const feeTypeName = getFeeTypeName(payment.feeTypeId);
-          invoiceContent += `      ${new Date(payment.date).toLocaleDateString().padEnd(12)} ${feeTypeName.padEnd(20)} ₹${payment.amount.toLocaleString().padStart(10)} ${payment.method.toUpperCase().padEnd(10)} ${payment.receiptNumber}\n`;
+          invoiceContent += `      ${new Date(payment.date).toLocaleDateString().padEnd(12)} ${feeTypeName.padEnd(20)} Rs${payment.amount.toLocaleString().padStart(10)} ${payment.method.toUpperCase().padEnd(10)} ${payment.receiptNumber}\n`;
           monthTotal += payment.amount;
           totalPaid += payment.amount;
         });
         
-        invoiceContent += `      ${' '.repeat(32)} Month Total: ₹${monthTotal.toLocaleString()}\n`;
+        invoiceContent += `      ${' '.repeat(32)} Month Total: Rs${monthTotal.toLocaleString()}\n`;
       });
     }
 
@@ -233,9 +233,9 @@ const PaymentManagement: React.FC = () => {
       SUMMARY
       =======
       Total Months with Payments: ${sortedMonths.length}
-      Total Amount Paid: ₹${totalPaid.toLocaleString()}
-      ${structure ? `Outstanding Amount: ₹${Math.max(0, outstandingAmount).toLocaleString()}` : ''}
-      Current Dues: ₹${structure ? Math.max(0, structure.totalAmount - (totalPaid % (structure.totalAmount || 1))).toLocaleString() : '0'}
+      Total Amount Paid: Rs${totalPaid.toLocaleString()}
+      ${structure ? `Outstanding Amount: Rs${Math.max(0, outstandingAmount).toLocaleString()}` : ''}
+      Current Dues: Rs${structure ? Math.max(0, structure.totalAmount - (totalPaid % (structure.totalAmount || 1))).toLocaleString() : '0'}
       
       Note: This invoice shows all payment records for this student.
       ${studentPayments.length === 0 ? 'No payments have been recorded yet.' : ''}
@@ -357,7 +357,7 @@ const PaymentManagement: React.FC = () => {
                     </div>
                     <div className="text-xs text-muted-foreground">
                       <p>Months Paid: {monthsPaid}</p>
-                      <p>Total Paid: ₹{totalPaid.toLocaleString()}</p>
+                      <p>Total Paid: Rs{totalPaid.toLocaleString()}</p>
                     </div>
                     <Button
                       size="sm"
@@ -435,7 +435,7 @@ const PaymentManagement: React.FC = () => {
                   
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4">
                     <div className="text-left sm:text-right">
-                      <p className="text-lg font-semibold text-foreground">₹{payment.amount.toLocaleString()}</p>
+                      <p className="text-lg font-semibold text-foreground">Rs{payment.amount.toLocaleString()}</p>
                       <p className="text-xs lg:text-sm text-muted-foreground capitalize">{payment.method}</p>
                     </div>
                     

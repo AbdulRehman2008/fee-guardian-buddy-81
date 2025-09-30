@@ -324,7 +324,7 @@ const StudentManagement: React.FC<StudentManagementProps> = ({ onNavigateToPasso
                 {dues > 0 && (
                   <div className="p-2 bg-destructive/10 rounded border border-destructive/20">
                     <p className="text-sm font-medium text-destructive">
-                      Outstanding: ₹{dues.toLocaleString()}
+                      Outstanding: Rs{dues.toLocaleString()}
                     </p>
                   </div>
                 )}
