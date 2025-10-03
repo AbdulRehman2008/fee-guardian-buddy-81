@@ -38,14 +38,14 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'Fees Collected',
-      value: `₹${totalCollected.toLocaleString()}`,
+      value: `Rs${totalCollected.toLocaleString()}`,
       icon: DollarSign,
       color: 'bg-success',
       change: '+8%'
     },
     {
       title: 'Outstanding Dues',
-      value: `₹${totalDues.toLocaleString()}`,
+      value: `Rs${totalDues.toLocaleString()}`,
       icon: CreditCard,
       color: 'bg-warning',
       change: '-3%'
@@ -106,7 +106,7 @@ const Dashboard: React.FC = () => {
                       <p className="text-xs lg:text-sm text-muted-foreground">{payment.receiptNumber}</p>
                     </div>
                     <div className="text-right ml-2">
-                      <p className="font-medium text-foreground text-sm lg:text-base">₹{payment.amount.toLocaleString()}</p>
+                      <p className="font-medium text-foreground text-sm lg:text-base">Rs{payment.amount.toLocaleString()}</p>
                       <Badge variant={payment.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
                         {payment.status}
                       </Badge>
@@ -137,7 +137,7 @@ const Dashboard: React.FC = () => {
                       <p className="text-xs lg:text-sm text-muted-foreground">Course: {student.course === 'web' ? 'Web Development' : student.course === 'graphics' ? 'Graphics Design' : 'MS Office'}</p>
                     </div>
                     <div className="text-right ml-2">
-                      <p className="font-medium text-warning text-sm lg:text-base">₹{dues.toLocaleString()}</p>
+                      <p className="font-medium text-warning text-sm lg:text-base">Rs:{dues.toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground">Outstanding</p>
                     </div>
                   </div>

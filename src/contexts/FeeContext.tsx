@@ -1,4 +1,16 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { 
+  collection, 
+  doc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  onSnapshot, 
+  query, 
+  orderBy,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export interface Student {
   id: string;
@@ -56,16 +68,17 @@ interface FeeContextType {
   passoutStudents: PassoutStudent[];
   feeStructures: FeeStructure[];
   payments: Payment[];
-  addStudent: (student: Omit<Student, 'id'>) => string;
-  updateStudent: (id: string, student: Partial<Student>) => void;
-  deleteStudent: (id: string) => void;
-  addPassoutStudent: (student: Omit<PassoutStudent, 'id'>) => void;
-  updatePassoutStudent: (id: string, student: Partial<PassoutStudent>) => void;
-  deletePassoutStudent: (id: string) => void;
-  addFeeStructure: (structure: Omit<FeeStructure, 'id'>) => void;
-  updateFeeStructure: (id: string, structure: Partial<FeeStructure>) => void;
-  deleteFeeStructure: (id: string) => void;
-  addPayment: (payment: Omit<Payment, 'id' | 'receiptNumber'>) => void;
+  loading: boolean;
+  addStudent: (student: Omit<Student, 'id'>) => Promise<string>;
+  updateStudent: (id: string, student: Partial<Student>) => Promise<void>;
+  deleteStudent: (id: string) => Promise<void>;
+  addPassoutStudent: (student: Omit<PassoutStudent, 'id'>) => Promise<void>;
+  updatePassoutStudent: (id: string, student: Partial<PassoutStudent>) => Promise<void>;
+  deletePassoutStudent: (id: string) => Promise<void>;
+  addFeeStructure: (structure: Omit<FeeStructure, 'id'>) => Promise<void>;
+  updateFeeStructure: (id: string, structure: Partial<FeeStructure>) => Promise<void>;
+  deleteFeeStructure: (id: string) => Promise<void>;
+  addPayment: (payment: Omit<Payment, 'id' | 'receiptNumber'>) => Promise<void>;
   getStudentDues: (studentId: string) => number;
 }
 
@@ -84,120 +97,181 @@ interface FeeProviderProps {
 }
 
 export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
-  const [students, setStudents] = useState<Student[]>([
-    {
-      id: '1',
-      name: 'John Doe',
-      whatsappNumber: '+1234567890',
-      course: 'web',
-      parentName: 'Robert Doe',
-      parentContact: '+1234567890',
-      email: 'john.doe@email.com',
-      admissionDate: '2024-01-15'
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      whatsappNumber: '+1234567891',
-      course: 'graphics',
-      parentName: 'Michael Smith',
-      parentContact: '+1234567891',
-      email: 'jane.smith@email.com',
-      admissionDate: '2024-01-16'
-    }
-  ]);
-
+  const [students, setStudents] = useState<Student[]>([]);
   const [passoutStudents, setPassoutStudents] = useState<PassoutStudent[]>([]);
+  const [feeStructures, setFeeStructures] = useState<FeeStructure[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [feeStructures, setFeeStructures] = useState<FeeStructure[]>([
-    {
-      id: '1',
-      name: 'Web Development Fee Structure',
-      course: 'web',
-      feeTypes: [
-        { id: '1', name: 'Tuition Fee', amount: 5000, frequency: 'monthly', category: 'tuition' },
-        { id: '2', name: 'Transport Fee', amount: 1500, frequency: 'monthly', category: 'transport' },
-        { id: '3', name: 'Library Fee', amount: 500, frequency: 'yearly', category: 'library' }
-      ],
-      totalAmount: 7000
+  // Set up real-time listeners for Firestore collections
+  useEffect(() => {
+    const unsubscribeStudents = onSnapshot(
+      query(collection(db, 'students'), orderBy('createdAt', 'desc')),
+      (snapshot) => {
+        const studentsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Student[];
+        setStudents(studentsData);
+      }
+    );
+
+    const unsubscribePassoutStudents = onSnapshot(
+      query(collection(db, 'passoutStudents'), orderBy('graduationDate', 'desc')),
+      (snapshot) => {
+        const passoutData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as PassoutStudent[];
+        setPassoutStudents(passoutData);
+      }
+    );
+
+    const unsubscribeFeeStructures = onSnapshot(
+      collection(db, 'feeStructures'),
+      (snapshot) => {
+        const structuresData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as FeeStructure[];
+        setFeeStructures(structuresData);
+      }
+    );
+
+    const unsubscribePayments = onSnapshot(
+      query(collection(db, 'payments'), orderBy('date', 'desc')),
+      (snapshot) => {
+        const paymentsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Payment[];
+        setPayments(paymentsData);
+      }
+    );
+
+    setLoading(false);
+
+    // Cleanup listeners on unmount
+    return () => {
+      unsubscribeStudents();
+      unsubscribePassoutStudents();
+      unsubscribeFeeStructures();
+      unsubscribePayments();
+    };
+  }, []);
+
+  const addStudent = async (studentData: Omit<Student, 'id'>): Promise<string> => {
+    try {
+      const docRef = await addDoc(collection(db, 'students'), {
+        ...studentData,
+        createdAt: serverTimestamp()
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding student:', error);
+      throw error;
     }
-  ]);
+  };
 
-  const [payments, setPayments] = useState<Payment[]>([
-    {
-      id: '1',
-      studentId: '1',
-      feeTypeId: '1',
-      amount: 5000,
-      date: '2024-01-15',
-      method: 'online',
-      receiptNumber: 'RCP001',
-      status: 'completed'
+  const updateStudent = async (id: string, studentData: Partial<Student>): Promise<void> => {
+    try {
+      await updateDoc(doc(db, 'students', id), {
+        ...studentData,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error updating student:', error);
+      throw error;
     }
-  ]);
-
-  const addStudent = (studentData: Omit<Student, 'id'>) => {
-    const newStudent: Student = {
-      ...studentData,
-      id: Date.now().toString()
-    };
-    setStudents(prev => [...prev, newStudent]);
-    return newStudent.id;
   };
 
-  const updateStudent = (id: string, studentData: Partial<Student>) => {
-    setStudents(prev => prev.map(student => 
-      student.id === id ? { ...student, ...studentData } : student
-    ));
+  const deleteStudent = async (id: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, 'students', id));
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      throw error;
+    }
   };
 
-  const deleteStudent = (id: string) => {
-    setStudents(prev => prev.filter(student => student.id !== id));
+  const addPassoutStudent = async (studentData: Omit<PassoutStudent, 'id'>): Promise<void> => {
+    try {
+      await addDoc(collection(db, 'passoutStudents'), {
+        ...studentData,
+        createdAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error adding passout student:', error);
+      throw error;
+    }
   };
 
-  const addPassoutStudent = (studentData: Omit<PassoutStudent, 'id'>) => {
-    const newStudent: PassoutStudent = {
-      ...studentData,
-      id: Date.now().toString()
-    };
-    setPassoutStudents(prev => [...prev, newStudent]);
+  const updatePassoutStudent = async (id: string, studentData: Partial<PassoutStudent>): Promise<void> => {
+    try {
+      await updateDoc(doc(db, 'passoutStudents', id), {
+        ...studentData,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error updating passout student:', error);
+      throw error;
+    }
   };
 
-  const updatePassoutStudent = (id: string, studentData: Partial<PassoutStudent>) => {
-    setPassoutStudents(prev => prev.map(student => 
-      student.id === id ? { ...student, ...studentData } : student
-    ));
+  const deletePassoutStudent = async (id: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, 'passoutStudents', id));
+    } catch (error) {
+      console.error('Error deleting passout student:', error);
+      throw error;
+    }
   };
 
-  const deletePassoutStudent = (id: string) => {
-    setPassoutStudents(prev => prev.filter(student => student.id !== id));
+  const addFeeStructure = async (structureData: Omit<FeeStructure, 'id'>): Promise<void> => {
+    try {
+      await addDoc(collection(db, 'feeStructures'), {
+        ...structureData,
+        createdAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error adding fee structure:', error);
+      throw error;
+    }
   };
 
-  const addFeeStructure = (structureData: Omit<FeeStructure, 'id'>) => {
-    const newStructure: FeeStructure = {
-      ...structureData,
-      id: Date.now().toString()
-    };
-    setFeeStructures(prev => [...prev, newStructure]);
+  const updateFeeStructure = async (id: string, structureData: Partial<FeeStructure>): Promise<void> => {
+    try {
+      await updateDoc(doc(db, 'feeStructures', id), {
+        ...structureData,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error updating fee structure:', error);
+      throw error;
+    }
   };
 
-  const updateFeeStructure = (id: string, structureData: Partial<FeeStructure>) => {
-    setFeeStructures(prev => prev.map(structure => 
-      structure.id === id ? { ...structure, ...structureData } : structure
-    ));
+  const deleteFeeStructure = async (id: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, 'feeStructures', id));
+    } catch (error) {
+      console.error('Error deleting fee structure:', error);
+      throw error;
+    }
   };
 
-  const deleteFeeStructure = (id: string) => {
-    setFeeStructures(prev => prev.filter(structure => structure.id !== id));
-  };
-
-  const addPayment = (paymentData: Omit<Payment, 'id' | 'receiptNumber'>) => {
-    const newPayment: Payment = {
-      ...paymentData,
-      id: Date.now().toString(),
-      receiptNumber: `RCP${Date.now().toString().slice(-6)}`
-    };
-    setPayments(prev => [...prev, newPayment]);
+  const addPayment = async (paymentData: Omit<Payment, 'id' | 'receiptNumber'>): Promise<void> => {
+    try {
+      const receiptNumber = `RCP${Date.now().toString().slice(-6)}`;
+      await addDoc(collection(db, 'payments'), {
+        ...paymentData,
+        receiptNumber,
+        createdAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error adding payment:', error);
+      throw error;
+    }
   };
 
   const getStudentDues = (studentId: string): number => {
@@ -219,6 +293,7 @@ export const FeeProvider: React.FC<FeeProviderProps> = ({ children }) => {
       passoutStudents,
       feeStructures,
       payments,
+      loading,
       addStudent,
       updateStudent,
       deleteStudent,
